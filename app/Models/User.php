@@ -7,7 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\Hash; // <-- Import the Hash facade
+use Illuminate\Support\Facades\Hash; // Ensure Hash is imported if using mutator
+use Illuminate\Database\Eloquent\Relations\HasMany; // <-- Import HasMany
 
 class User extends Authenticatable // Optional: implements MustVerifyEmail
 {
@@ -15,8 +16,6 @@ class User extends Authenticatable // Optional: implements MustVerifyEmail
 
     /**
      * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -26,8 +25,6 @@ class User extends Authenticatable // Optional: implements MustVerifyEmail
 
     /**
      * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -36,44 +33,35 @@ class User extends Authenticatable // Optional: implements MustVerifyEmail
 
     /**
      * The attributes that should be cast.
-     *
-     * @var array<string, string>
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        // REMOVED: 'password' => 'hashed', // Remove this line
+        // REMOVED: 'password' => 'hashed', // Use mutator below instead if cast fails
     ];
 
     /**
-     * Set the user's password.
-     * Automatically hash the password when setting the attribute.
-     * This is an attribute mutator.
-     *
-     * @param  string  $value
-     * @return void
+     * Set the user's password (Mutator for hashing).
      */
-    public function setPasswordAttribute($value): void // <-- ADD THIS METHOD
+    public function setPasswordAttribute($value): void
     {
-        // Only hash the password if it's not already hashed
-        // (prevents re-hashing if setting the attribute with an existing hash)
-        // However, for create/update via validated data, it will always be plain text here.
         $this->attributes['password'] = Hash::make($value);
     }
 
-    // --- Define Relationships (Example) ---
     /**
      * Get the saved recipes for the user.
+     * Defines a one-to-many relationship.
      */
-    // public function savedRecipes() // : HasMany
-    // {
-    //     return $this->hasMany(SavedRecipe::class);
-    // }
+    public function savedRecipes(): HasMany // <-- ADD THIS METHOD
+    {
+        return $this->hasMany(SavedRecipe::class);
+    }
 
     /**
      * Get the OTPs associated with the user.
+     * (Keep this if using the UserOtp model)
      */
-    // public function otps() // : HasMany
-    // {
-    //     return $this->hasMany(UserOtp::class);
-    // }
+    public function otps(): HasMany // <-- ADD THIS METHOD if using UserOtp model
+    {
+         return $this->hasMany(UserOtp::class);
+    }
 }

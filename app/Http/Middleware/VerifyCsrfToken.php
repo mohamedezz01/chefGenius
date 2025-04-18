@@ -12,6 +12,9 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        // REMOVE or COMMENT OUT the line below if present,
+        // because our /api/saved-recipes routes are now in web.php
+        // and need CSRF protection.
+        // 'api/*',
     ];
 }
